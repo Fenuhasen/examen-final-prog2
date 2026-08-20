@@ -60,6 +60,18 @@ public class StockMovementService {
 
     public StockMovementResponse createStockMovement(CreateStockMovementRequest request) {
         try {
+            if (request == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "request body is required");
+            }
+
+            if (request.getProductId() == null || request.getProductId().isBlank()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "productId is required");
+            }
+
+            if (request.getMovementType() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "movementType is required");
+            }
+
             if (request.getQuantity() <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "quantity must be greater than 0");
             }
