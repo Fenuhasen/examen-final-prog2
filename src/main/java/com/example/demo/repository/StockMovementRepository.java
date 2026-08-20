@@ -1,26 +1,56 @@
 package com.example.demo.repository;
 
-import java.util.List;
-
-import com.example.demo.model.StockMovement;
-
-
 import com.example.demo.model.MovementType;
 import com.example.demo.model.Product;
 import com.example.demo.model.StockMovement;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+@Repository
 public class StockMovementRepository {
 
-    private final Connection connection;
+    private final Environment environment;
 
-    public StockMovementRepository(Connection connection) {
-        this.connection = connection;
+    public StockMovementRepository(Environment environment) {
+        this.environment = environment;
+    }
+
+    private Connection getConnection() throws Exception {
+        String url = environment.getRequiredProperty("spring.datasource.url");
+        String username = environment.getProperty("spring.datasource.username");
+        String password = environment.getProperty("spring.datasource.password");
+
+        return DriverManager.getConnection(url, username, password);
+    }
+
+    public List<StockMovement> findAll() throws Exception {
+        String sql = """
+                SELECT sm.id, sm.created_at, sm.movement_type, sm.quantity,
+                       p.id AS product_id, p.name, p.description, p.unit_price
+                FROM stock_movement sm
+                JOIN product p ON p.id = sm.product_id
+                ORDER BY sm.created_at
+                """;
+
+        List<StockMovement> movements = new ArrayList<>();
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                movements.add(mapRow(resultSet));
+            }
+        }
+
+        return movements;
     }
 
     public List<StockMovement> findByProductId(String productId) throws Exception {
@@ -35,27 +65,13 @@ public class StockMovementRepository {
 
         List<StockMovement> movements = new ArrayList<>();
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, productId);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    Product product = new Product(
-                            resultSet.getString("product_id"),
-                            resultSet.getString("name"),
-                            resultSet.getString("description"),
-                            resultSet.getBigDecimal("unit_price")
-                    );
-
-                    StockMovement movement = new StockMovement(
-                            resultSet.getString("id"),
-                            resultSet.getTimestamp("created_at").toInstant(),
-                            MovementType.valueOf(resultSet.getString("movement_type")),
-                            resultSet.getInt("quantity"),
-                            product
-                    );
-
-                    movements.add(movement);
+                    movements.add(mapRow(resultSet));
                 }
             }
         }
@@ -75,27 +91,13 @@ public class StockMovementRepository {
 
         List<StockMovement> movements = new ArrayList<>();
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, type.name());
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    Product product = new Product(
-                            resultSet.getString("product_id"),
-                            resultSet.getString("name"),
-                            resultSet.getString("description"),
-                            resultSet.getBigDecimal("unit_price")
-                    );
-
-                    StockMovement movement = new StockMovement(
-                            resultSet.getString("id"),
-                            resultSet.getTimestamp("created_at").toInstant(),
-                            MovementType.valueOf(resultSet.getString("movement_type")),
-                            resultSet.getInt("quantity"),
-                            product
-                    );
-
-                    movements.add(movement);
+                    movements.add(mapRow(resultSet));
                 }
             }
         }
@@ -110,7 +112,8 @@ public class StockMovementRepository {
                 VALUES (?, ?::movement_type, ?, ?)
                 """;
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, stockMovement.getId());
             statement.setString(2, stockMovement.getMovementType().name());
             statement.setInt(3, stockMovement.getQuantity());
@@ -135,7 +138,8 @@ public class StockMovementRepository {
                 WHERE product_id = ?
                 """;
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, productId);
 
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -143,5 +147,22 @@ public class StockMovementRepository {
                 return resultSet.getInt(1);
             }
         }
+    }
+
+    private StockMovement mapRow(ResultSet resultSet) throws Exception {
+        Product product = new Product(
+                resultSet.getString("product_id"),
+                resultSet.getString("name"),
+                resultSet.getString("description"),
+                resultSet.getBigDecimal("unit_price")
+        );
+
+        return new StockMovement(
+                resultSet.getString("id"),
+                resultSet.getTimestamp("created_at").toInstant(),
+                MovementType.valueOf(resultSet.getString("movement_type")),
+                resultSet.getInt("quantity"),
+                product
+        );
     }
 }
