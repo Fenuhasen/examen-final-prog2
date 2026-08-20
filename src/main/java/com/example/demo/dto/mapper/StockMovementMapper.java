@@ -1,4 +1,19 @@
-package com.example.demo.dto.mapper;
+package com.example.demo.model;
 
-public class StockMovementMapper {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.Instant;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class StockMovement {
+
+    private String id;
+    private Instant createdAt;
+    private MovementType movementType;
+    private int quantity;
+    private Product product;
 }
