@@ -1,4 +1,14 @@
 package com.example.demo.dto.mapper;
 
-public class StockMovementMapper {
+import com.example.demo.dto.response.StockMovementResponse;
+import com.example.demo.model.StockMovement;
+
+public final class StockMovementMapper {
+
+    private StockMovementMapper() {
+    }
+
+    public static StockMovementResponse toResponse(StockMovement stockMovement) {
+        return DtoMapper.toStockMovementResponse(stockMovement);
+    }
 }
