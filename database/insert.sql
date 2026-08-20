@@ -2,7 +2,7 @@ INSERT INTO product (id, name, description, unit_price)
 VALUES
 ('p001', 'Clavier', 'Clavier mécanique', 75.00),
 ('p002', 'Souris', 'Souris sans fil', 35.50),
-('p003', 'Écran', 'Écran 24 pouces', 180.00);
+('p003', 'Ecran', 'Ecran 24 pouces', 180.00);
 
 INSERT INTO stock_movement
     (id, movement_type, quantity, product_id)
