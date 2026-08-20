@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
 import org.springframework.web.bind.annotation.RestController;
-import com.example.demo.service.StockMouvementService;
+import com.example.demo.service.StockMovementService;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,8 +12,8 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.MatrixVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import com.example.demo.model.StockMouvement;
-import com.example.demo.model.MouvementType;
+import com.example.demo.model.StockMovement;
+import com.example.demo.model.MovementType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -22,17 +22,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Setter
 
 @RestController
-public class StockMouvementController {
-    private StockMouvementService stockMouvementService;
+public class StockMovementController {
+    private StockMovementService stockMovementService;
 
     @GetMapping("/stock-mouvements")
-    public List<StockMouvement> getAllStockMouvementByType(@RequestParam String type) {
-        return this.stockMouvementService.getAllStockMouvementByType(MouvementType.valueof(type));
+    public List<StockMovement> getAllStockMouvementByType(@RequestParam String type) {
+        return this.stockMovementService.getAllStockMouvementByType(MovementType.valueOf(type));
     }
 
     @GetMapping("/stock-mouvements")
-    public List<StockMouvement> findAll() {
-        return this.stockMouvementService.findAll();
+    public List<StockMovement> findAll() {
+        return this.stockMovementService.findAll();
     }
 
     @PostMapping("/stock-mouvements")

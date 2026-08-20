@@ -1,15 +1,18 @@
 package com.example.demo.controller;
 
 import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.model.StockMovement;
 import com.example.demo.service.ProductService;
-import com.example.demo.model.StockMouvement;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @AllArgsConstructor
 @Getter
@@ -25,8 +28,8 @@ public class ProductController {
     }
 
     @GetMapping("/products/{id}/stock-mouvements")
-    public List<StockMouvement> getStockMouvementByProductId(@PathVariable String id) {
-        return this.productService.getStockMouvementByProductId(id);
+    public List<StockMovement> getStockMouvementByProductId(@PathVariable String id) {
+        return this.productService.getStockMovementByProductId(id);
     }
 
 }
